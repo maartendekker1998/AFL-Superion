@@ -11,16 +11,31 @@
 using namespace antlr4;
 using namespace std;
 
-/*
-extern "C" int parse(char* target,size_t len,char* second,size_t lenS);
-extern "C" void fuzz(int index, char** ret, size_t* retlen);
-*/
-
 #define MAXSAMPLES 10000
 #define MAXTEXT 200
 string ret[MAXSAMPLES];
 
-int parse(const char* target,size_t len,const char* second,size_t lenS) {
+bool is_gramattically_valid(const char* target, size_t len){
+
+	string targetString;
+
+	targetString=string(target,len);
+	ANTLRInputStream input(targetString);
+	XMLLexer lexer(&input);
+	CommonTokenStream tokens(&lexer);
+	XMLParser parser(&tokens);
+
+	tree::ParseTree* tree = parser.document();
+
+	if(parser.getNumberOfSyntaxErrors()>0){
+		std::cerr<<"NumberOfSyntaxErrors:"<<parser.getNumberOfSyntaxErrors()<<endl;
+		return false;
+	}else{
+		return true;
+	}
+}
+
+extern "C" int parse(const char* target,size_t len,const char* second,size_t lenS) {
 	vector<misc::Interval> intervals;
 	vector<string> texts;
 	int num_of_samples=0;
@@ -66,7 +81,7 @@ int parse(const char* target,size_t len,const char* second,size_t lenS) {
 
 
 			//parse sencond
-            cout << "111second" <<endl;
+            //cout << "111second" <<endl;
 			string secondString;
 			try{
 				secondString=string(second,lenS);
@@ -75,7 +90,7 @@ int parse(const char* target,size_t len,const char* second,size_t lenS) {
 				CommonTokenStream tokensS(&lexerS);
 				XMLParser parserS(&tokensS);
 				tree::ParseTree* treeS = parserS.document();
-                cout << "second" <<endl;
+                //cout << "second" <<endl;
 
 				if(parserS.getNumberOfSyntaxErrors()>0){
 		 			std::cerr<<"second NumberOfSyntaxErrors S:"<<parserS.getNumberOfSyntaxErrors()<<endl;
@@ -95,13 +110,13 @@ int parse(const char* target,size_t len,const char* second,size_t lenS) {
 
 				interval_size = intervals.size();
 				texts_size = texts.size();
-                cout << interval_size << endl;
-                cout << texts_size << endl;
+                //cout << interval_size << endl;
+                //cout << texts_size << endl;
 
 				for(int i=0;i<interval_size;i++){
 					for(int j=0;j<texts_size;j++){
 						rewriter.replace(intervals[i].a,intervals[i].b,texts[j]);
-                        cout << 1111 <<endl;
+                        //cout << 1111 <<endl;
 						ret[num_of_samples++]=rewriter.getText();
 						if(num_of_samples>MAXSAMPLES){
 							break;
@@ -122,62 +137,45 @@ int parse(const char* target,size_t len,const char* second,size_t lenS) {
 	return num_of_samples;
 }
 
-void fuzz(int index, char** result, size_t* retlen){
+extern "C" void fuzz(int index, char** result, size_t* retlen){
   *retlen=ret[index].length();
   *result=strdup(ret[index].c_str());
-  //result=(char*)malloc(retlen+1);
-  //strcpy(result,ret[index].c_str());
 }
 
 int main(){
-  	//ifstream in;
-	//string target;
-  	//in.open("./test.md");
-	//while(in>>target){
-	//}
-    ifstream ifs("test.md");
+	/*
+		This function takes one input, parsers it into ASTs and provides all mutations the fuzz()
+		function is capable of. For each result the parsing is attempted again to check the 
+		validity in adherance to the grammar used.
+	*/
+
+    ifstream ifs("~/afl_input/test.xml");
     string target( (std::istreambuf_iterator<char>(ifs) ),
                        (std::istreambuf_iterator<char>()));
-    ifstream ifs1("source.md");
+    ifstream ifs1("~/afl_input/test.xml");
     string second( (std::istreambuf_iterator<char>(ifs1) ),
                        (std::istreambuf_iterator<char>()));
 
   	int len = target.length();
   	int lenS= second.length();
+
     cout <<target << endl;
   	int num_of_samples=parse(target.c_str(),len,second.c_str(),lenS);
+
   	for(int i=0;i<num_of_samples;i++){
+
      	char* retbuf=nullptr;
      	size_t retlen=0;
      	fuzz(i,&retbuf,&retlen);
-     	cout<<retlen<<retbuf<<endl;
+
+		if(is_gramattically_valid(retbuf, retlen)){
+			cout<<"VALID ENTRY"<<endl;
+		}else{
+			cout<<"NON VALID ENTRY"<<endl;
+		}
+		cout<<retlen<<retbuf<<endl;
+		cout<<endl;
   	}
+
   	cout<<num_of_samples<<endl;
 }
-/*
-void getFiles(string path, vector<string>& files){
-	DIR *dir;
-	struct dirent *dp;
-	if((dir=opendir(path.c_str()))==NULL){
-		cout<<"Error"<<errno<<path<<endl;
-	}
-	while((dp=readdir(dir))!=NULL){
-		files.push_back(string(dp->d_name));
-	}
-	closedir(dir);
-}
-
-int main(){
-	string filePath="/home/b/XML/";
-	vector<string> files;
-
-	getFiles(filePath,files);
-
-	char str[30];
-	int size=files.size();
-	for(int i=0;i<size;i++){
-		cout<<files[i].c_str()<<endl;
-	}
-}
-*/
-
