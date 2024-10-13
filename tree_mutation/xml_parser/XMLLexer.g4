@@ -1,93 +1,123 @@
-/*
- [The "BSD licence"]
- Copyright (c) 2013 Terence Parr
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
- 1. Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
- 2. Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
- 3. The name of the author may not be used to endorse or promote products
-    derived from this software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-/** XML lexer derived from ANTLR v4 ref guide book example */
 lexer grammar XMLLexer;
 
 // Default "mode": Everything OUTSIDE of a tag
-COMMENT     :   '<!--' .*? '-->' ;
-CDATA       :   '<![CDATA[' .*? ']]>' ;
+COMMENT : '<!--' .*? '-->';
+CDATA   : '<![CDATA[' .*? ']]>';
 /** Scarf all DTD stuff, Entity Declarations like <!ENTITY ...>,
  *  and Notation Declarations <!NOTATION ...>
  */
-DTD         :   '<!' .*? '>'            -> skip ;
-EntityRef   :   '&' Name ';' ;
-CharRef     :   '&#' DIGIT+ ';'
-            |   '&#x' HEXDIGIT+ ';'
-            ;
-SEA_WS      :   (' '|'\t'|'\r'? '\n')+ ;
+DTD       : '<!' .*? '>' -> skip;
+EntityRef : '&' Name ';';
+CharRef   : '&#' DIGIT+ ';' | '&#x' HEXDIGIT+ ';';
+SEA_WS    : (' ' | '\t' | '\r'? '\n')+;
 
-OPEN        :   '<'                     -> pushMode(INSIDE) ;
-XMLDeclOpen :   '<?xml' S               -> pushMode(INSIDE) ;
-SPECIAL_OPEN:   '<?' Name               -> more, pushMode(PROC_INSTR) ;
+OPEN         : '<'       -> pushMode(INSIDE);
+XMLDeclOpen  : '<?xml'   -> pushMode(INSIDE);
+SPECIAL_OPEN : '<?' Name -> more, pushMode(PROC_INSTR);
 
-TEXT        :   ~[<&]+ ;        // match any 16 bit char other than < and &
+TEXT: ~[<&]+; // match any 16 bit char other than < and &
+
 
 // ----------------- Everything INSIDE of a tag ---------------------
 mode INSIDE;
 
-CLOSE       :   '>'                     -> popMode ;
-SPECIAL_CLOSE:  '?>'                    -> popMode ; // close <?xml...?>
-SLASH_CLOSE :   '/>'                    -> popMode ;
-SLASH       :   '/' ;
-EQUALS      :   '=' ;
-STRING      :   '"' ~[<"]* '"'
-            |   '\'' ~[<']* '\''
-            ;
-Name        :   NameStartChar NameChar* ;
-S           :   [ \t\r\n]               -> skip ;
+// SOAP LAYER
+SOAP_ENVELOPE                          : 'soap-env:Envelope';
+SOAP_HEADER                            : 'soap-env:Header';
+SOAP_BODY                              : 'soap-env:Body';
+SOAP_FAULT                             : 'soap-env:Fault';
+SOAP_FAULTCODE                         : 'faultcode';
+SOAP_FAULTSTRING                       : 'faultstring';
+SOAP_FAULT_DETAIL                      : 'detail';
+SOAP_ATTRIBUTE_MUSTUNDERSTAND          : S 'soap-env:mustUnderstand="1"';
+CWMP_SOAP_HEADER_ELEMENT_ID            : 'cwmp:ID';
+CWMP_SOAP_HEADER_ELEMENT_HOLD_REQUESTS : 'cwmp:HoldRequests';
 
-fragment
-HEXDIGIT    :   [a-fA-F0-9] ;
+// CWMP RPC tags
+CWMP_ADD_OBJECT                  : 'cwmp:AddObject';
+CWMP_DELETE_OBJECT               : 'cwmp:DeleteObject';
+CWMP_DOWNLOAD                    : 'cwmp:Download';
+CWMP_FACTORY_RESET               : 'cwmp:FactoryReset';
+CWMP_FAULT                       : 'cwmp:Fault';
+CWMP_GET_RPC_METHODS             : 'cwmp:GetRPCMethods';
+CWMP_GET_RPC_METHODS_RESPONSE    : 'cwmp:GetRPCMethodsResponse';
+CWMP_GET_PARAMETER_ATTRIBUTES    : 'cwmp:GetParameterAttributes';
+CWMP_GET_PARAMETER_NAMES         : 'cwmp:GetParameterNames';
+CWMP_GET_PARAMETER_VALUES        : 'cwmp:GetParameterValues';
+CWMP_RPC_INFORM_RESPONSE         : 'cwmp:InformResponse';
+CWMP_REBOOT                      : 'cwmp:Reboot';
+CWMP_SCHEDULE_INFORM             : 'cwmp:ScheduleInform';
+CWMP_SET_PARAMETER_ATTRIBUTES    : 'cwmp:SetParameterAttributes';
+CWMP_SET_PARAMETER_VALUES        : 'cwmp:SetParameterValues';
+CWMP_TRANSFER_COMPLETE_RESPONSE  : 'cwmp:TransferCompleteResponse';
+CWMP_UPLOAD                      : 'cwmp:Upload';
 
-fragment
-DIGIT       :   [0-9] ;
 
-fragment
-NameChar    :   NameStartChar
-            |   '-' | '_' | '.' | DIGIT
-            |   '\u00B7'
-            |   '\u0300'..'\u036F'
-            |   '\u203F'..'\u2040'
-            ;
+// CWMP xml tags
+CWMP_ACCESS_LIST                     : 'AccessList';
+CWMP_ACCESS_LIST_CHANGE              : 'AccessListChange';
+CWMP_COMMANDKEY                      : 'CommandKey';
+CWMP_DELAY_SECONDS                   : 'DelaySeconds';
+CWMP_FAILURE_URL                     : 'FailureURL';
+CWMP_FILESIZE                        : 'FileSize';
+CWMP_FILETYPE                        : 'FileType';
+CWMP_FAULTCODE                       : 'FaultCode';
+CWMP_FAULTSTRING                     : 'FaultString';
+CWMP_METHODLIST                      : 'MethodList';
+CWMP_MAX_ENVELOPES                   : 'MaxEnvelopes';
+CWMP_NAME                            : 'Name';
+CWMP_NEXT_LEVEL                      : 'NextLevel';
+CWMP_NOTIFICATION_CHANGE             : 'NotificationChange';
+CWMP_NOTIFICATION                    : 'Notification';
+CWMP_OBJECT_NAME                     : 'ObjectName';
+CWMP_PARAMETER_KEY                   : 'ParameterKey';
+CWMP_PARAMETER_LIST                  : 'ParameterList';
+CWMP_PARAMETER_NAMES                 : 'ParameterNames';
+CWMP_PARAMETER_PATH                  : 'ParameterPath';
+CWMP_PARAMETER_VALUE_STRUCT          : 'ParameterValueStruct';
+CWMP_PASSWORD                        : 'Password';
+CWMP_SET_PARAMETER_ATTRIBUTES_STRUCT : 'SetParameterAttributesStruct';
+CWMP_STRING                          : 'string';
+CWMP_SUCCESS_URL                     : 'SuccessURL';
+CWMP_TARGET_FILE_NAME                : 'TargetFileName';
+CWMP_URL                             : 'URL';
+CWMP_USERNAME                        : 'Username';
+CWMP_VALUE                           : 'Value';
 
-fragment
-NameStartChar
-            :   [:a-zA-Z]
-            |   '\u2070'..'\u218F'
-            |   '\u2C00'..'\u2FEF'
-            |   '\u3001'..'\uD7FF'
-            |   '\uF900'..'\uFDCF'
-            |   '\uFDF0'..'\uFFFD'
-            ;
+CLOSE         : '>'  -> popMode;
+SPECIAL_CLOSE : '?>' -> popMode; // close <?xml...?>
+SLASH_CLOSE   : '/>' -> popMode;
+SLASH         : '/';
+EQUALS        : '=';
+COLON         : ':';
+STRING        : '"' ~[<"]* '"' | '\'' ~[<']* '\'';
+Name          : S NameStartChar NameChar*;
+S             : [ \t\r\n] -> skip;
+
+fragment HEXDIGIT: [a-fA-F0-9];
+fragment DIGIT: [0-9];
+
+fragment NameChar:
+    NameStartChar
+    | '-'
+    | '.'
+    | DIGIT
+    | '\u00B7'
+    | '\u0300' ..'\u036F'
+    | '\u203F' ..'\u2040'
+;
+
+fragment NameStartChar:
+    [_:a-zA-Z]
+    | '\u2070' ..'\u218F'
+    | '\u2C00' ..'\u2FEF'
+    | '\u3001' ..'\uD7FF'
+    | '\uF900' ..'\uFDCF'
+    | '\uFDF0' ..'\uFFFD'
+;
 
 // ----------------- Handle <? ... ?> ---------------------
 mode PROC_INSTR;
 
-PI          :   '?>'                    -> popMode ; // close <?...?>
-IGNORE      :   .                       -> more ;
+PI     : '?>' -> popMode; // close <?...?>
+IGNORE : .    -> more;

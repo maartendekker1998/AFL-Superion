@@ -1,4 +1,5 @@
-
+.vscode
+.antlr
 afl-analyze
 afl-as
 afl-clang-fast

@@ -149,18 +149,26 @@ int main(){
 		validity in adherance to the grammar used.
 	*/
 
-    ifstream ifs("~/afl_input/test.xml");
+    ifstream ifs("/home/maarten/afl_input/test.xml");
     string target( (std::istreambuf_iterator<char>(ifs) ),
                        (std::istreambuf_iterator<char>()));
-    ifstream ifs1("~/afl_input/test.xml");
+    ifstream ifs1("/home/maarten/afl_input/test2.xml");
     string second( (std::istreambuf_iterator<char>(ifs1) ),
                        (std::istreambuf_iterator<char>()));
 
   	int len = target.length();
   	int lenS= second.length();
 
-    cout <<target << endl;
   	int num_of_samples=parse(target.c_str(),len,second.c_str(),lenS);
+
+	if(is_gramattically_valid(target.c_str(),len)){
+		cout<<"VALID ENTRY"<<endl;
+    	cout <<target << endl;
+		cout<<endl;
+	}
+
+	int j = 0;
+
 
   	for(int i=0;i<num_of_samples;i++){
 
@@ -168,14 +176,20 @@ int main(){
      	size_t retlen=0;
      	fuzz(i,&retbuf,&retlen);
 
+		// if(i==20){break;}
+
 		if(is_gramattically_valid(retbuf, retlen)){
 			cout<<"VALID ENTRY"<<endl;
+			cout<<retlen<<retbuf<<endl;
+			cout<<endl;
+			j++;
 		}else{
 			cout<<"NON VALID ENTRY"<<endl;
 		}
-		cout<<retlen<<retbuf<<endl;
-		cout<<endl;
+		// cout<<endl;
   	}
+
+	cout<<j<<endl;
 
   	cout<<num_of_samples<<endl;
 }
