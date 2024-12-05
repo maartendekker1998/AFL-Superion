@@ -1,4 +1,4 @@
-lexer grammar XMLLexer;
+lexer grammar CWMPLexer;
 
 // Default "mode": Everything OUTSIDE of a tag
 COMMENT : '<!--' .*? '-->';

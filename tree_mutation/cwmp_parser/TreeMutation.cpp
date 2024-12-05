@@ -2,10 +2,10 @@
 #include <cstring>
 #include <fstream>
 #include "antlr4-runtime.h"
-#include "XMLLexer.h"
-#include "XMLParser.h"
-#include "XMLParserBaseVisitor.h"
-#include "XMLParserSecondVisitor.h"
+#include "CWMPLexer.h"
+#include "CWMPParser.h"
+#include "CWMPParserBaseVisitor.h"
+#include "CWMPParserSecondVisitor.h"
 #include <dirent.h>
 
 using namespace antlr4;
@@ -21,9 +21,9 @@ bool is_gramattically_valid(const char* target, size_t len){
 
 	targetString=string(target,len);
 	ANTLRInputStream input(targetString);
-	XMLLexer lexer(&input);
+	CWMPLexer lexer(&input);
 	CommonTokenStream tokens(&lexer);
-	XMLParser parser(&tokens);
+	CWMPParser parser(&tokens);
 
 	tree::ParseTree* tree = parser.document();
 
@@ -45,9 +45,9 @@ extern "C" int parse(const char* target,size_t len,const char* second,size_t len
 		targetString=string(target,len);
 		ANTLRInputStream input(targetString);
 		//ANTLRInputStream input(target);
-		XMLLexer lexer(&input);
+		CWMPLexer lexer(&input);
 		CommonTokenStream tokens(&lexer);
-		XMLParser parser(&tokens);
+		CWMPParser parser(&tokens);
 		TokenStreamRewriter rewriter(&tokens);
 		tree::ParseTree* tree = parser.document();
 		cout<<targetString<<endl;
@@ -56,7 +56,7 @@ extern "C" int parse(const char* target,size_t len,const char* second,size_t len
 			return 0;
 		}else{
  
-			XMLParserBaseVisitor *visitor=new XMLParserBaseVisitor();
+			CWMPParserBaseVisitor *visitor=new CWMPParserBaseVisitor();
 			visitor->visit(tree);
 
 			int interval_size = visitor->intervals.size();
@@ -86,16 +86,16 @@ extern "C" int parse(const char* target,size_t len,const char* second,size_t len
 			try{
 				secondString=string(second,lenS);
 				ANTLRInputStream inputS(secondString);
-				XMLLexer lexerS(&inputS);
+				CWMPLexer lexerS(&inputS);
 				CommonTokenStream tokensS(&lexerS);
-				XMLParser parserS(&tokensS);
+				CWMPParser parserS(&tokensS);
 				tree::ParseTree* treeS = parserS.document();
                 //cout << "second" <<endl;
 
 				if(parserS.getNumberOfSyntaxErrors()>0){
 		 			std::cerr<<"second NumberOfSyntaxErrors S:"<<parserS.getNumberOfSyntaxErrors()<<endl;
 				}else{
-					XMLParserSecondVisitor *visitorS=new XMLParserSecondVisitor();
+					CWMPParserSecondVisitor *visitorS=new CWMPParserSecondVisitor();
 					visitorS->visit(treeS);
 					texts_size = visitorS->texts.size();
 					for(int i=0;i<texts_size;i++){

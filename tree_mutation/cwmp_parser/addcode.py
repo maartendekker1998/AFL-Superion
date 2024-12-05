@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     with open("%s.h" % name, 'r+') as fp:
         code = fp.read()
-        code = code.replace('#include "antlr4-runtime.h"\n#include "XMLParserVisitor.h"', '#include <iostream>\n#include <vector>\n#include "antlr4-runtime.h"\n#include "XMLParserVisitor.h"\nusing namespace std;\nusing namespace antlr4;\n')
+        code = code.replace('#include "antlr4-runtime.h"\n#include "CWMPParserVisitor.h"', '#include <iostream>\n#include <vector>\n#include "antlr4-runtime.h"\n#include "CWMPParserVisitor.h"\nusing namespace std;\nusing namespace antlr4;\n')
         code = code.replace('public:\n', 'public:\n\tvector<misc::Interval> intervals;\n\tvector<string> texts;\n\n')
         fp.seek(0)
 
@@ -31,5 +31,5 @@ if __name__ == '__main__':
     with open('%s.cpp' % name, 'r') as input_f:
         code = input_f.read()
         code = code.replace('BaseVisitor', 'SecondVisitor')
-        with open('XMLParserSecondVisitor.cpp', 'w') as output_f:
+        with open('CWMPParserSecondVisitor.cpp', 'w') as output_f:
             output_f.write(code)

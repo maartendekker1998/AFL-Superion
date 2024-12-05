@@ -221,36 +221,44 @@ static void edit_params(u32 argc, char** argv) {
 
   }
 
-  if (asan_set) {
+  setenv("AFL_USE_ASAN", "1", 1);
+  cc_params[cc_par_cnt++] = "-U_FORTIFY_SOURCE";
+  cc_params[cc_par_cnt++] = "-fsanitize=address";
 
-    /* Pass this on to afl-as to adjust map density. */
+  // afl-cov flags
+  // cc_params[cc_par_cnt++] = "-fprofile-arcs";
+  // cc_params[cc_par_cnt++] = "-ftest-coverage";
 
-    setenv("AFL_USE_ASAN", "1", 1);
+  // if (asan_set) {
 
-  } else if (getenv("AFL_USE_ASAN")) {
+  //   /* Pass this on to afl-as to adjust map density. */
 
-    if (getenv("AFL_USE_MSAN"))
-      FATAL("ASAN and MSAN are mutually exclusive");
+  //   setenv("AFL_USE_ASAN", "1", 1);
 
-    if (getenv("AFL_HARDEN"))
-      FATAL("ASAN and AFL_HARDEN are mutually exclusive");
+  // } else if (getenv("AFL_USE_ASAN")) {
 
-    cc_params[cc_par_cnt++] = "-U_FORTIFY_SOURCE";
-    cc_params[cc_par_cnt++] = "-fsanitize=address";
+  //   if (getenv("AFL_USE_MSAN"))
+  //     FATAL("ASAN and MSAN are mutually exclusive");
 
-  } else if (getenv("AFL_USE_MSAN")) {
+  //   if (getenv("AFL_HARDEN"))
+  //     FATAL("ASAN and AFL_HARDEN are mutually exclusive");
 
-    if (getenv("AFL_USE_ASAN"))
-      FATAL("ASAN and MSAN are mutually exclusive");
+  //   cc_params[cc_par_cnt++] = "-U_FORTIFY_SOURCE";
+  //   cc_params[cc_par_cnt++] = "-fsanitize=address";
 
-    if (getenv("AFL_HARDEN"))
-      FATAL("MSAN and AFL_HARDEN are mutually exclusive");
+  // } else if (getenv("AFL_USE_MSAN")) {
 
-    cc_params[cc_par_cnt++] = "-U_FORTIFY_SOURCE";
-    cc_params[cc_par_cnt++] = "-fsanitize=memory";
+  //   if (getenv("AFL_USE_ASAN"))
+  //     FATAL("ASAN and MSAN are mutually exclusive");
+
+  //   if (getenv("AFL_HARDEN"))
+  //     FATAL("MSAN and AFL_HARDEN are mutually exclusive");
+
+  //   cc_params[cc_par_cnt++] = "-U_FORTIFY_SOURCE";
+  //   cc_params[cc_par_cnt++] = "-fsanitize=memory";
 
 
-  }
+  // }
 
   if (!getenv("AFL_DONT_OPTIMIZE")) {
 

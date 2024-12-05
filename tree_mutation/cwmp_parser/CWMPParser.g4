@@ -1,7 +1,7 @@
-parser grammar XMLParser;
+parser grammar CWMPParser;
 
 options {
-    tokenVocab = XMLLexer;
+    tokenVocab = CWMPLexer;
 }
 
 
@@ -26,6 +26,7 @@ soap_envelope
     
 soap_header
     : '<' SOAP_HEADER attribute* '>' cwmp_soap_header_element* '<' '/' SOAP_HEADER '>'
+    | '<' SOAP_HEADER attribute* '/>'
     ;
     
 soap_body
@@ -157,6 +158,7 @@ cwmp_get_parameter_names
 
 parameter_path
     : '<' CWMP_PARAMETER_PATH '>' content '<' '/' CWMP_PARAMETER_PATH '>'
+    | '<' CWMP_PARAMETER_PATH '/>'
     ;
 
 next_level
@@ -206,11 +208,11 @@ cwmp_schedule_inform
 // SET PARAMETER VALUES
 //
 cwmp_set_parameter_values
-    : '<' CWMP_SET_PARAMETER_VALUES '>' '<' CWMP_PARAMETER_LIST attribute* '>' parameter_value_struct* '<' '/' CWMP_PARAMETER_LIST '>' parameter_key '<' '/' CWMP_SET_PARAMETER_VALUES '>' 
+    : '<' CWMP_SET_PARAMETER_VALUES attribute* '>' '<' CWMP_PARAMETER_LIST attribute* '>' parameter_value_struct* '<' '/' CWMP_PARAMETER_LIST '>' parameter_key? '<' '/' CWMP_SET_PARAMETER_VALUES '>' 
     ;
 
 parameter_value_struct
-    : '<' CWMP_PARAMETER_VALUE_STRUCT '>' struct_name pvs_value '<' '/' CWMP_PARAMETER_VALUE_STRUCT '>'
+    : '<' CWMP_PARAMETER_VALUE_STRUCT attribute* '>' struct_name pvs_value '<' '/' CWMP_PARAMETER_VALUE_STRUCT '>'
     ;
 
 pvs_value
@@ -288,7 +290,8 @@ password
     ;
 
 parameter_key
-    : '<' CWMP_PARAMETER_KEY '>' content '<' '/' CWMP_PARAMETER_KEY '>'
+    : '<' CWMP_PARAMETER_KEY attribute* '>' content '<' '/' CWMP_PARAMETER_KEY '>'
+    | '<' CWMP_PARAMETER_KEY '/>'
     ;
 
 parameter_names
@@ -301,7 +304,7 @@ string_array
     ;
 
 struct_name
-    : '<' CWMP_NAME '>' content '<' '/' CWMP_NAME '>'
+    : '<' CWMP_NAME attribute* '>' content '<' '/' CWMP_NAME '>'
     ;
 
 url

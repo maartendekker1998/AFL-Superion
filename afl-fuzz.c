@@ -6152,8 +6152,8 @@ retry_external_pick:
   /****************
    * RANDOM HAVOC *
    ****************/
-  ret_val = 0;
-  goto abandon_entry;
+  // ret_val = 0;
+  // goto abandon_entry;
   // penghui: personally think this is wrong! 
   
 havoc_stage:
